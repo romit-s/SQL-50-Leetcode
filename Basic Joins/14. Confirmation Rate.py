@@ -63,8 +63,12 @@ joined_df = signups_df.join(confirmations_df,"user_id","left")
 
 # COMMAND ----------
 
-from pyspark.sql.functions import sum,count,when
-count_df = joined_df.groupBy("user_id").agg([count("*").alias("total_count"),sum(when(col("action")=="confirmed",1).otherwise(0)).alias("confirmed_count")])
+from pyspark.sql.functions import sum,count,when,col
+count_df = joined_df.groupBy("user_id").agg(count("action").alias("total_count"),sum(when(col("action")=="confirmed",1).otherwise(0)).alias("confirmed_count"))
+
+# COMMAND ----------
+
+count_df.withColumn("confirmation_rate",col("confirmed_count")/col("total_count")).select("user_id","confirmation_rate").show()
 
 # COMMAND ----------
 
